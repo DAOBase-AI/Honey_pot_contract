@@ -47,7 +47,7 @@ contract HoneyPotPurchaseOnBNB is Ownable {
     function setEthPrice(uint256 _ethPrice) external onlyOwner {
         ethPrice = _ethPrice;
     }
-    
+
     function setUsdtPrice(uint256 _price) external onlyOwner {
         usdtPrice = _price;
     }
@@ -56,7 +56,7 @@ contract HoneyPotPurchaseOnBNB is Ownable {
 
         require(user != address(0), "User cannot be the zero address");
         require(user != newReferrer, "User cannot be their own referrer");
-    
+
         mintedAddress[user] = true;
 
         if(newReferrer != address(0)){
@@ -66,7 +66,7 @@ contract HoneyPotPurchaseOnBNB is Ownable {
         }
 
     }
-    
+
     function setCommissionRate(uint256 _commissionRate) external onlyOwner {
         commissionRate = _commissionRate;
         emit CommissionRateUpdated(_commissionRate);
@@ -81,7 +81,7 @@ contract HoneyPotPurchaseOnBNB is Ownable {
     }
 
     function buyWithERC20(address tokenAddress, uint256 quantity, address referrer) internal whenNotPaused checkPurchaseLimit(quantity) {
-       
+
         uint256 price = (tokenAddress == usdtAddress) ? usdtPrice : ethPrice;
         uint256 totalPrice = price * quantity;
         IERC20 token = IERC20(tokenAddress);
@@ -89,7 +89,7 @@ contract HoneyPotPurchaseOnBNB is Ownable {
         address effectiveReferrer = address(0);
         if (userReferrer[msg.sender] != address(0)) {
             effectiveReferrer = userReferrer[msg.sender];
-        } else if (referrer != address(0) && mintedAddress[referrer] ) {
+        } else if (referrer != address(0) && mintedAddress[referrer] && msg.sender != referrer) {
             effectiveReferrer = referrer;
             userReferrer[msg.sender] = referrer;
         }

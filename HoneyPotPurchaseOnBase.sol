@@ -14,7 +14,7 @@ contract HoneyPotPurchaseOnBase is Ownable {
     address public treasuryAddress;
     address public usdcAddress;
     uint256 public commissionRate = 10;
-    uint256 public maxPurchaseLimit = 20; 
+    uint256 public maxPurchaseLimit = 20;
     uint256 public usdcPrice = 500 * 10**6;
     uint256 public ethPrice = 0.25 ether;
 
@@ -44,6 +44,12 @@ contract HoneyPotPurchaseOnBase is Ownable {
         _;
     }
 
+    function setNftAddress(address _nftAddress) external onlyOwner {
+
+        require(_nftAddress != address(0), "Invalid address: cannot be zero address");
+        nftContract = IERC721(_nftAddress);
+    }
+
     function setEthPrice(uint256 _ethPrice) external onlyOwner {
         ethPrice = _ethPrice;
     }
@@ -58,11 +64,11 @@ contract HoneyPotPurchaseOnBase is Ownable {
         require(user != address(0), "User cannot be the zero address");
         require(user != newReferrer, "User cannot be their own referrer");
         require(userReferrer[user] == address(0), "User already has a referrer");
-    
+
         userReferrer[user] = newReferrer;
-        
+
         emit ReferrerUpdated(user, newReferrer);
-        
+
     }
 
     function setCommissionRate(uint256 _commissionRate) external onlyOwner {
@@ -79,14 +85,14 @@ contract HoneyPotPurchaseOnBase is Ownable {
     }
 
     function buyWithETH(uint256 quantity, address payable referrer) external payable whenNotPaused checkPurchaseLimit(quantity) {
-       
+
         uint256 totalPrice = ethPrice * quantity;
         require(msg.value >= totalPrice, "Insufficient ETH sent");
 
         address payable effectiveReferrer = payable(address(0));
         if (userReferrer[msg.sender] != address(0)) {
             effectiveReferrer = payable(userReferrer[msg.sender]);
-        } else if (referrer != address(0) && nftContract.balanceOf(referrer) > 0) {
+        } else if (referrer != address(0) && nftContract.balanceOf(referrer) > 0 && msg.sender != referrer) {
             effectiveReferrer = referrer;
             userReferrer[msg.sender] = referrer;
         }
@@ -108,14 +114,14 @@ contract HoneyPotPurchaseOnBase is Ownable {
     }
 
     function buyWithUSDC(uint256 quantity, address referrer) external whenNotPaused checkPurchaseLimit(quantity) {
-       
+
         uint256 totalPrice = usdcPrice * quantity;
         IERC20 token = IERC20(usdcAddress);
 
         address effectiveReferrer = address(0);
         if (userReferrer[msg.sender] != address(0)) {
             effectiveReferrer = userReferrer[msg.sender];
-        } else if (referrer != address(0) && nftContract.balanceOf(referrer) > 0) {
+        } else if (referrer != address(0) && nftContract.balanceOf(referrer) > 0 && msg.sender != referrer) {
             effectiveReferrer = referrer;
             userReferrer[msg.sender] = referrer;
         }

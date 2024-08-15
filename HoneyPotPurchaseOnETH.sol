@@ -52,7 +52,7 @@ contract HoneyPotPurchaseOnETH is Ownable {
     function setUsdtPrice(uint256 _price) external onlyOwner {
         usdtPrice = _price;
     }
-    
+
     function setUsdcPrice(uint256 _price) external onlyOwner {
         usdcPrice = _price;
     }
@@ -61,7 +61,7 @@ contract HoneyPotPurchaseOnETH is Ownable {
 
         require(user != address(0), "User cannot be the zero address");
         require(user != newReferrer, "User cannot be their own referrer");
-    
+
         mintedAddress[user] = true;
 
         if(newReferrer != address(0)){
@@ -86,17 +86,16 @@ contract HoneyPotPurchaseOnETH is Ownable {
     }
 
     function buyWithETH(uint256 quantity, address payable referrer) external payable whenNotPaused checkPurchaseLimit(quantity) {
-       
+
         uint256 totalPrice = ethPrice * quantity;
         require(msg.value >= totalPrice, "Insufficient ETH sent");
 
         address payable effectiveReferrer = payable(address(0));
         if (userReferrer[msg.sender] != address(0)) {
             effectiveReferrer = payable(userReferrer[msg.sender]);
-        } else if (referrer != address(0) && mintedAddress[referrer] ) {
+        } else if (referrer != address(0) && mintedAddress[referrer] && msg.sender != referrer) {
             effectiveReferrer = referrer;
             userReferrer[msg.sender] = referrer;
-            
         }
 
         uint256 commission = 0;
@@ -110,7 +109,7 @@ contract HoneyPotPurchaseOnETH is Ownable {
         if(!mintedAddress[msg.sender]){
             mintedAddress[msg.sender] = true;
         }
-        
+
         if (msg.value > totalPrice) {
             payable(msg.sender).transfer(msg.value - totalPrice);
         }
@@ -119,7 +118,7 @@ contract HoneyPotPurchaseOnETH is Ownable {
     }
 
     function buyWithERC20(address tokenAddress, uint256 quantity, address referrer) internal whenNotPaused checkPurchaseLimit(quantity) {
-       
+
         uint256 price = (tokenAddress == usdtAddress) ? usdtPrice : usdcPrice;
         uint256 totalPrice = price * quantity;
         IERC20 token = IERC20(tokenAddress);
@@ -127,7 +126,7 @@ contract HoneyPotPurchaseOnETH is Ownable {
         address effectiveReferrer = address(0);
         if (userReferrer[msg.sender] != address(0)) {
             effectiveReferrer = userReferrer[msg.sender];
-        } else if (referrer != address(0) && mintedAddress[referrer] ) {
+        } else if (referrer != address(0) && mintedAddress[referrer] && msg.sender != referrer) {
             effectiveReferrer = referrer;
             userReferrer[msg.sender] = referrer;
         }
