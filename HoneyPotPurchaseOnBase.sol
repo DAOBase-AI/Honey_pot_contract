@@ -86,6 +86,7 @@ contract HoneyPotPurchaseOnBase is Ownable {
 
     function buyWithETH(uint256 quantity, address payable referrer) external payable whenNotPaused checkPurchaseLimit(quantity) {
 
+        require(quantity > 0, "Quantity must be greater than zero");
         uint256 totalPrice = ethPrice * quantity;
         require(msg.value >= totalPrice, "Insufficient ETH sent");
 
@@ -115,6 +116,7 @@ contract HoneyPotPurchaseOnBase is Ownable {
 
     function buyWithUSDC(uint256 quantity, address referrer) external whenNotPaused checkPurchaseLimit(quantity) {
 
+        require(quantity > 0, "Quantity must be greater than zero");
         uint256 totalPrice = usdcPrice * quantity;
         IERC20 token = IERC20(usdcAddress);
 

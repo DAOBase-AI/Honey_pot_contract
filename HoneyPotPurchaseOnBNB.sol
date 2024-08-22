@@ -82,6 +82,7 @@ contract HoneyPotPurchaseOnBNB is Ownable {
 
     function buyWithERC20(address tokenAddress, uint256 quantity, address referrer) internal whenNotPaused checkPurchaseLimit(quantity) {
 
+        require(quantity > 0, "Quantity must be greater than zero");
         uint256 price = (tokenAddress == usdtAddress) ? usdtPrice : ethPrice;
         uint256 totalPrice = price * quantity;
         IERC20 token = IERC20(tokenAddress);
